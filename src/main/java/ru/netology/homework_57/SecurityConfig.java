@@ -2,8 +2,6 @@ package ru.netology.homework_57;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,25 +9,25 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.ArrayList;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                (requests) -> {
-                    requests.requestMatchers("/endpoint0").permitAll();
-                    requests.anyRequest().authenticated();
-                }
-        );
-
-        http.formLogin(Customizer.withDefaults());
-
-        return http.build();
-    }
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.authorizeHttpRequests(
+//                (requests) -> {
+//                    requests.requestMatchers("/endpoint0").permitAll();
+//                }
+//        );
+//
+//        http.formLogin(Customizer.withDefaults());
+//
+//        return http.build();
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,11 +38,32 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         PasswordEncoder encoder = passwordEncoder();
 
-        UserDetails user = User.builder()
-                .username("user")
-                .password(encoder.encode("password"))
-                .build();
+        var users = new ArrayList<UserDetails>();
 
-        return new InMemoryUserDetailsManager(user);
+        users.add(
+                User.builder()
+                        .username("reader")
+                        .password(encoder.encode("nopasswd"))
+                        .roles("READ")
+                        .build()
+        );
+
+        users.add(
+                User.builder()
+                        .username("writer")
+                        .password(encoder.encode("nopasswd"))
+                        .roles("WRITE")
+                        .build()
+        );
+
+        users.add(
+                User.builder()
+                        .username("deleter")
+                        .password(encoder.encode("nopasswd"))
+                        .roles("DELETE")
+                        .build()
+        );
+
+        return new InMemoryUserDetailsManager(users);
     }
 }
